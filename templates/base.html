@@ -28,7 +28,7 @@
     <!-- 🌐 وسوم Google SEO الأساسية -->
     <meta name="description" content="{% block meta_desc %}يyear news - أخبار العالم  لحظة بلحظة، مع تغطية سياسية واجتماعية واقتصادية ورياضية ومجتمعية.{% endblock %}">
 
-    <meta name="keywords" content="يير نيوز, أخبار سنة, اخبار العالم, العالم شندي اليوم, أخبارالعالم , احداث اليوم , اخبار الدول العربية, العالم اليوم, الخليج , الشرق الاوسط, افريقيا, اسيا, اسياء,قارة">
+    <meta name="keywords" content="يير نيوز, أخبار سنة, اخبار العالم, العالم اسياء اليوم, أخبارالعالم , احداث اليوم , اخبار الدول العربية, العالم اليوم, الخليج , الشرق الاوسط, افريقيا, اسيا, اسياء,قارة">
 
     <meta name="author" content="هيئة تحرير يير نيوز">
 
@@ -53,9 +53,9 @@
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:site_name" content="يير نيوز">
 
-    <meta property="og:title" content="{% block og_title %}يير نيوز | أخبار شندي ونهر النيل{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}يير نيوز | أخبار العالم {% endblock %}">
 
-    <meta property="og:description" content="{% block og_desc %}أحدث أخبار مدينة شندي وولاية نهر النيل والسودان على مدار الساعة.{% endblock %}">
+    <meta property="og:description" content="{% block og_desc %}أحدث أخبارالعالم على مدار الساعة.{% endblock %}">
 
     <meta property="og:url" content="{% block og_url %}{{ request.base_url }}{% endblock %}">
 
@@ -68,9 +68,9 @@
     <!-- 🐦 Twitter / X -->
     <meta name="twitter:card" content="summary_large_image">
 
-    <meta name="twitter:title" content="{% block tw_title %}يير نيوز | أخبار شندي ونهر النيل{% endblock %}">
+    <meta name="twitter:title" content="{% block tw_title %}يير نيوز | أخبار العالم اليوم{% endblock %}">
 
-    <meta name="twitter:description" content="{% block tw_desc %}أحدث الأخبار والتقارير من شندي وولاية نهر النيل والسودان.{% endblock %}">
+    <meta name="twitter:description" content="{% block tw_desc %}أحدث الأخبار والتقارير من العالم.{% endblock %}">
 
     <meta name="twitter:image" content="{% block tw_image %}{{ url_for('static', filename='uploads/logo.png', _external=True) }}{% endblock %}">
 
@@ -746,9 +746,9 @@
             </li>
 
             <li>
-                <a href="/?category=سياسية"
-                   class="nav-link {% if current_category=='سياسية' %}active{% endif %}">
-                    أخبار سياسية
+                <a href="/?category=ثقافية"
+                   class="nav-link {% if current_category=='ثقافية' %}active{% endif %}">
+                    أخبار ثقافية
                 </a>
             </li>
 
@@ -820,7 +820,7 @@
 
                     <li>
                         <a href="/?category=سياسية">
-                            الأخبار السياسية
+                            الأخبار الثقافية
                         </a>
                     </li>
 
