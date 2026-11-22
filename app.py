@@ -49,7 +49,7 @@ db = client.shendi_news_db
 # =========================================================
 
 def upload_image_to_imgbb(file_storage):
-    """ارفع الصورة إلى ImgBB؛ ارفع خطأ واضحًا بدل إرجاع رابط فارغ بصمت."""
+    """Same multipart upload format as Shendi; fail visibly on ImgBB errors."""
     if not file_storage or not file_storage.filename:
         raise ValueError("لم يتم اختيار صورة للرفع")
 
@@ -60,35 +60,34 @@ def upload_image_to_imgbb(file_storage):
     file_bytes = file_storage.read()
     if not file_bytes:
         raise ValueError("ملف الصورة فارغ")
-
-    # صور كبيرة جدًا قد يرفضها مزود الخدمة.
     if len(file_bytes) > 32 * 1024 * 1024:
         raise ValueError("حجم الصورة أكبر من 32 ميجابايت")
 
     try:
+        # Identical request construction to the working Shendi uploader.
         response = requests.post(
             "https://api.imgbb.com/1/upload",
-            params={"key": api_key},
-            files={"image": (secure_filename(file_storage.filename) or "news-image", file_bytes,
-                             file_storage.mimetype or "application/octet-stream")},
-            timeout=35
+            data={"key": api_key},
+            files={"image": file_bytes},
+            timeout=15
         )
-        try:
-            result = response.json()
-        except ValueError:
-            app.logger.error("ImgBB returned non-JSON response; status=%s", response.status_code)
-            raise RuntimeError("ImgBB أعاد استجابة غير مفهومة")
-
-        if response.ok and result.get("success") and result.get("data", {}).get("url"):
-            return result["data"]["url"]
-
-        error = result.get("error") or {}
-        error_msg = error.get("message", "Unknown ImgBB error") if isinstance(error, dict) else str(error)
-        app.logger.error("ImgBB upload failed: HTTP %s; reason: %s", response.status_code, error_msg)
-        raise RuntimeError("رفض ImgBB رفع الصورة: " + str(error_msg))
     except requests.RequestException as exc:
-        app.logger.exception("ImgBB network error")
-        raise RuntimeError("تعذّر الاتصال بخدمة رفع الصور ImgBB") from exc
+        app.logger.exception("ImgBB upload connection error")
+        raise RuntimeError("تعذّر الاتصال بخدمة ImgBB") from exc
+
+    try:
+        result = response.json()
+    except ValueError as exc:
+        app.logger.error("ImgBB non-JSON response; HTTP %s", response.status_code)
+        raise RuntimeError(f"ImgBB أعاد استجابة غير مفهومة (HTTP {response.status_code})") from exc
+
+    if response.ok and result.get("success") and result.get("data", {}).get("url"):
+        return result["data"]["url"]
+
+    error = result.get("error") or {}
+    message = error.get("message", "Unknown error") if isinstance(error, dict) else str(error)
+    app.logger.error("ImgBB upload rejected; HTTP %s; message=%s", response.status_code, message)
+    raise RuntimeError(f"رفض ImgBB رفع الصورة (HTTP {response.status_code}): {message}")
 
 
 # =========================================================
