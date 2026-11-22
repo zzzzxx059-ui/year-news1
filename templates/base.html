@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-J3XMETVBCS"></script>
+
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-J3XMETVBCS');
+    </script>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-adsense-account" content="ca-pub-1632368230954022">
+
+    <!-- عنوان الصفحة -->
+    <title>{% block title %}year news | أحداث العالم {% endblock %}</title>
+
+    <!-- 🌐 وسوم Google SEO الأساسية -->
+    <meta name="description" content="{% block meta_desc %}يyear news - أخبار العالم  لحظة بلحظة، مع تغطية سياسية واجتماعية واقتصادية ورياضية ومجتمعية.{% endblock %}">
+
+    <meta name="keywords" content="يير نيوز, أخبار سنة, اخبار العالم, العالم شندي اليوم, أخبارالعالم , احداث اليوم , اخبار الدول العربية, العالم اليوم, الخليج , الشرق الاوسط, افريقيا, اسيا, اسياء,قارة">
+
+    <meta name="author" content="هيئة تحرير يير نيوز">
+
+    <!-- السماح لمحركات البحث بفهرسة الموقع -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+
+    <!-- Canonical -->
+    <link rel="canonical" href="{% block canonical_url %}{{ request.base_url }}{% endblock %}">
+
+    <!-- 🌐 معلومات إضافية لمحركات البحث -->
+    <meta name="theme-color" content="#091a33">
+    <meta name="language" content="Arabic">
+    <meta name="geo.region" content="SD-NR">
+    <meta name="geo.placename" content="Shendi, River Nile State, Sudan">
+
+    <!-- أيقونة الموقع -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='uploads/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='uploads/logo.png') }}">
+
+    <!-- 🔗 Open Graph / Facebook / WhatsApp -->
+    <meta property="og:locale" content="ar_AR">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:site_name" content="يير نيوز">
+
+    <meta property="og:title" content="{% block og_title %}يير نيوز | أخبار شندي ونهر النيل{% endblock %}">
+
+    <meta property="og:description" content="{% block og_desc %}أحدث أخبار مدينة شندي وولاية نهر النيل والسودان على مدار الساعة.{% endblock %}">
+
+    <meta property="og:url" content="{% block og_url %}{{ request.base_url }}{% endblock %}">
+
+    <meta property="og:image" content="{% block og_image %}{{ url_for('static', filename='uploads/logo.png', _external=True) }}{% endblock %}">
+
+    <meta property="og:image:alt" content="{% block og_image_alt %}شعار يير نيوز{% endblock %}">
+
+    <meta property="og:image:type" content="image/png">
+
+    <!-- 🐦 Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+
+    <meta name="twitter:title" content="{% block tw_title %}يير نيوز | أخبار شندي ونهر النيل{% endblock %}">
+
+    <meta name="twitter:description" content="{% block tw_desc %}أحدث الأخبار والتقارير من شندي وولاية نهر النيل والسودان.{% endblock %}">
+
+    <meta name="twitter:image" content="{% block tw_image %}{{ url_for('static', filename='uploads/logo.png', _external=True) }}{% endblock %}">
+
+    <meta name="twitter:image:alt" content="يير نيوز">
+
+    <!-- ========================================================= -->
+    <!-- 📊 البيانات المنظمة الرئيسية للموقع -->
+    <!-- ========================================================= -->
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "NewsMediaOrganization",
+      "name": "يير نيوز",
+      "alternateName": [
+        "أخبار سنة"
+      ],
+      "url": "{{ request.url_root }}",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ url_for('static', filename='uploads/logo.png', _external=True) }}"
+      },
+      "description": "صحيفة إلكترونية إخبارية تغطي أخبار مدينة شندي وولاية نهر النيل والسودان.",
+      "inLanguage": "ar",
+      "areaServed": {
+        "@type": "AdministrativeArea",
+        "name": "ولاية نهر النيل"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "شندي",
+        "addressRegion": "ولاية نهر النيل",
+        "addressCountry": "SD"
+      }
+    }
+    </script>
+
+    <!-- ========================================================= -->
+    <!-- 🌐 تعريف الموقع لمحركات البحث -->
+    <!-- ========================================================= -->
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "يير نيوز",
+      "alternateName": "أخبار سنة",
+      "url": "{{ request.url_root }}",
+      "inLanguage": "ar"
+    }
+    </script>
+
+    <!-- ========================================================= -->
+    <!-- 📰 هوية الموقع -->
+    <!-- ========================================================= -->
+
+    <meta property="article:publisher" content="يير نيوز">
+    <meta property="article:section" content="أخبار شندي">
+    <meta property="article:tag" content="شندي">
+    <meta property="article:tag" content="نهر النيل">
+    <meta property="article:tag" content="السودان">
+
+    <!-- استدعاء خط القاهرة -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+
+        :root {
+            --primary-red: #c8102e;
+            --dark-red: #900c1e;
+            --nile-blue: #0f2c59;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --gold-accent: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            direction: rtl;
+        }
+
+        /* الشريط العلوي */
+        .top-bar {
+            background: #111;
+            color: #ddd;
+            padding: 6px 5%;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* الهيدر الرئيسي */
+        .main-header {
+            background: linear-gradient(135deg, #091a33, #040c18);
+            padding: 12px 5%;
+            border-bottom: 4px solid var(--primary-red);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            min-height: 105px;
+        }
+
+        .header-brand-side {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* حاوية الشعار */
+        .logo-container {
+            position: relative;
+            display: inline-block;
+            overflow: hidden;
+            border-radius: 12px;
+            padding: 4px 8px;
+            text-decoration: none;
+            animation: shendiPulse 2.8s ease-in-out infinite;
+        }
+
+        .logo-image {
+            height: 85px;
+            max-height: 90px;
+            width: auto;
+            display: block;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+        }
+
+        /* تأثير شعاع الضوء */
+        .logo-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -160%;
+            width: 75%;
+            height: 100%;
+
+            background: linear-gradient(
+                90deg, 
+                rgba(255, 255, 255, 0) 0%, 
+                rgba(255, 255, 255, 0.7) 50%, 
+                rgba(255, 255, 255, 0) 100%
+            );
+
+            transform: skewX(-25deg);
+            pointer-events: none;
+            animation: lightLoop 3.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes shendiPulse {
+
+            0% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 0px rgba(200, 16, 46, 0));
+            }
+
+            50% {
+                transform: scale(1.035);
+                filter: drop-shadow(0 0 16px rgba(200, 16, 46, 0.8));
+            }
+
+            100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 0px rgba(200, 16, 46, 0));
+            }
+        }
+
+        @keyframes lightLoop {
+
+            0% {
+                left: -160%;
+            }
+
+            100% {
+                left: 170%;
+            }
+        }
+
+        /* نص شندي */
+        .header-slogan {
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-right: 3px solid var(--primary-red);
+            padding-right: 18px;
+        }
+
+        .slogan-title {
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #f8fafc;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slogan-title span {
+            color: var(--gold-accent);
+        }
+
+        .slogan-cities {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            font-weight: 600;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .slogan-cities i {
+            color: var(--primary-red);
+            font-size: 0.85rem;
+        }
+
+        /* شريط الأقسام */
+        .navbar {
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            overflow-x: auto;
+            padding: 10px 5%;
+            gap: 15px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 700;
+            padding: 8px 18px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: var(--primary-red);
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1350px;
+            margin: 25px auto;
+            padding: 0 20px;
+        }
+
+        /* بطاقات الأخبار */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .news-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #f1f5f9;
+        }
+
+        .news-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 14px 28px rgba(200, 16, 46, 0.12);
+        }
+
+        .card-img-wrapper {
+            position: relative;
+            height: 210px;
+            overflow: hidden;
+            border-bottom: 3px solid var(--primary-red);
+        }
+
+        .card-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .news-card:hover .card-img-wrapper img {
+            transform: scale(1.08);
+        }
+
+        .card-category-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--primary-red);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .card-body {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .card-summary {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            flex-grow: 1;
+
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .btn-read-more {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-red);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: gap 0.3s;
+        }
+
+        .btn-read-more:hover {
+            gap: 12px;
+            color: var(--dark-red);
+        }
+
+        /* أزرار التنقل */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 40px;
+        }
+
+        .page-btn {
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            padding: 8px 16px;
+            text-decoration: none;
+            color: var(--text-dark);
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .page-btn.active,
+        .page-btn:hover {
+            background: var(--primary-red);
+            color: #fff;
+            border-color: var(--primary-red);
+        }
+
+        /* الفوتر */
+        .main-footer {
+            background: #091524;
+            color: #fff;
+            margin-top: 60px;
+            padding-top: 45px;
+            border-top: 5px solid var(--primary-red);
+        }
+
+        .footer-grid {
+            max-width: 1350px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 30px;
+            padding: 0 20px 40px;
+        }
+
+        .footer-col h4 {
+            font-size: 1.15rem;
+            margin-bottom: 18px;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .footer-col h4::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--primary-red);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .footer-links a:hover {
+            color: #ffffff;
+        }
+
+        .footer-bottom {
+            background: #040910;
+            text-align: center;
+            padding: 16px;
+            color: #64748b;
+            font-size: 0.88rem;
+        }
+
+        /* 🍪 شريط الموافقة على ملفات تعريف الارتباط */
+        .cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(9, 21, 36, 0.96);
+            color: #f1f5f9;
+            padding: 16px 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            z-index: 9999;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.25);
+            font-size: 0.92rem;
+            border-top: 2px solid var(--primary-red);
+        }
+
+        .cookie-btn {
+            background: var(--primary-red);
+            color: #fff;
+            border: none;
+            padding: 9px 24px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .cookie-btn:hover {
+            background: var(--dark-red);
+        }
+
+        @media (max-width: 992px) {
+
+            .news-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .main-header {
+                justify-content: center;
+                text-align: center;
+            }
+
+            .header-brand-side {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .header-slogan {
+                border-right: none;
+                padding-right: 0;
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            .news-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .slogan-title {
+                font-size: 1.1rem;
+                justify-content: center;
+            }
+
+            .slogan-cities {
+                font-size: 0.8rem;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .cookie-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+
+        /* إصلاح شريط الأقسام على الجوال: الرئيسية ثابتة وباقي الأقسام قابلة للتمرير */
+        @media (max-width: 600px) {
+            .nav-container {
+                justify-content: flex-start;
+                align-items: center;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: 8px;
+                padding: 10px;
+                direction: rtl;
+                scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
+            }
+            .nav-container::-webkit-scrollbar { display: none; }
+            .nav-container li { flex: 0 0 auto; }
+            .nav-container li:first-child {
+                position: sticky;
+                right: 0;
+                z-index: 5;
+                background: #fff;
+                border-radius: 20px;
+            }
+            .nav-link {
+                display: block;
+                padding: 9px 13px;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- ========================================================= -->
+    <!-- الشريط العلوي -->
+    <!-- ========================================================= -->
+
+    <div class="top-bar">
+
+        <div>
+            <i class="fas fa-calendar-alt"></i>
+            شندي - ولاية نهر النيل | أخبار متجددة على مدار الساعة
+        </div>
+
+        <div>
+            <a href="/admin" style="color:#aaa; text-decoration:none;">
+                <i class="fas fa-user-shield"></i>
+                بوابة المحررين
+            </a>
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- الهيدر الرئيسي -->
+    <!-- ========================================================= -->
+
+    <header class="main-header">
+
+        <div class="header-brand-side">
+
+            <!-- اللوجو -->
+            <a href="/" class="logo-container" title="يير نيوز">
+
+                <img
+                    src="{{ url_for('static', filename='uploads/logo.png') }}"
+                    alt="شعار يير نيوز"
+                    class="logo-image"
+                    width="300"
+                    height="90"
+                    loading="eager"
+                    decoding="async"
+                >
+
+            </a>
+
+
+            <!-- العبارة -->
+            <div class="header-slogan">
+
+                <div class="slogan-title">
+                    يير نيوز
+                    <span>العالم كلو في يدك</span>
+                </div>
+
+                <div class="slogan-cities">
+
+                    <i class="fas fa-water"></i>
+
+                    (الشرق الاوسط - افريقيا - قارة اسياء - الخليج - امريكيا)
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- مكان استقبال بطاقة الطقس -->
+        <div class="header-weather-slot">
+
+            {% block header_weather %}{% endblock %}
+
+        </div>
+
+    </header>
+
+
+    <!-- ========================================================= -->
+    <!-- الأقسام -->
+    <!-- ========================================================= -->
+
+    <nav class="navbar" aria-label="القائمة الرئيسية">
+
+        <ul class="nav-container">
+
+            <li>
+                <a href="/" class="nav-link {% if not current_category %}active{% endif %}">
+                    الرئيسية
+                </a>
+            </li>
+
+            <li>
+                <a href="/?category=سياسية"
+                   class="nav-link {% if current_category=='سياسية' %}active{% endif %}">
+                    أخبار سياسية
+                </a>
+            </li>
+
+            <li>
+                <a href="/?category=اجتماعية"
+                   class="nav-link {% if current_category=='اجتماعية' %}active{% endif %}">
+                    أخبار اجتماعية
+                </a>
+            </li>
+
+            <li>
+                <a href="/?category=إقتصادية"
+                   class="nav-link {% if current_category=='إقتصادية' or current_category=='اقتصادية' %}active{% endif %}">
+                    اقتصادية
+                </a>
+            </li>
+
+            <li>
+                <a href="/?category=رياضية"
+                   class="nav-link {% if current_category=='رياضية' %}active{% endif %}">
+                    رياضية
+                </a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+
+    <!-- ========================================================= -->
+    <!-- محتوى الصفحة -->
+    <!-- ========================================================= -->
+
+    {% block content %}{% endblock %}
+
+
+    <!-- ========================================================= -->
+    <!-- الفوتر -->
+    <!-- ========================================================= -->
+
+    <footer class="main-footer">
+
+        <div class="footer-grid">
+
+
+            <!-- عن الصحيفة -->
+            <div class="footer-col">
+
+                <h4>عن يير نيوز</h4>
+
+                <p style="color:#94a3b8; line-height:1.7; font-size:0.92rem;">
+
+                    منصة إخبارية مستقلة تنقل نبض مدينة شندي
+                    وقرى ومدن ولاية نهر النيل والسودان،
+                    تلتزم بالمهنية والشفافية والدقة
+                    ومواكبة الخبر لحظة حدوثه.
+
+                </p>
+
+            </div>
+
+
+            <!-- أقسام الأخبار -->
+            <div class="footer-col">
+
+                <h4>أقسام الأخبار</h4>
+
+                <ul class="footer-links">
+
+                    <li>
+                        <a href="/?category=سياسية">
+                            الأخبار السياسية
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/?category=اجتماعية">
+                            الأخبار الاجتماعية
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/?category=إقتصادية">
+                            اقتصادية
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/?category=رياضية">
+                            رياضية
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <!-- الصفحات القانونية -->
+            <div class="footer-col">
+
+                <h4>سياسات وقوانين النشر</h4>
+
+                <ul class="footer-links">
+
+                    <li>
+                        <a href="/privacy-policy">
+                            <i class="fas fa-shield-alt"></i>
+                            سياسة الخصوصية
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/terms">
+                            <i class="fas fa-file-contract"></i>
+                            اتفاقية الاستخدام
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/about-us">
+                            <i class="fas fa-info-circle"></i>
+                            من نحن
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/contact">
+                            <i class="fas fa-envelope"></i>
+                            اتصل بنا
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <!-- بيانات التواصل -->
+            <div class="footer-col">
+
+                <h4>بيانات التواصل</h4>
+
+                <ul class="footer-links">
+
+                    <li>
+                        <i class="fas fa-envelope"></i>
+                        info@shendi-news.sd
+                    </li>
+
+                    <li>
+                        <i class="fas fa-map-marker-alt"></i>
+                        شندي - السوق الكبير - شارع النيل
+                    </li>
+
+                    <li>
+                        <i class="fab fa-facebook"></i>
+                        فيسبوك يير نيوز
+                    </li>
+
+                    <li>
+                        <i class="fab fa-twitter"></i>
+                        منصة X (تويتر سابقاً)
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+
+        <!-- حقوق النشر -->
+        <div class="footer-bottom">
+
+            جميع الحقوق محفوظة © يير نيوز 2026 |
+            صوت الأخبار من السودان والعالم
+
+        </div>
+
+    </footer>
+
+
+    <!-- ========================================================= -->
+    <!-- 🍪 نافذة الموافقة على الكوكيز -->
+    <!-- ========================================================= -->
+
+    <div
+        id="cookieNotice"
+        class="cookie-banner"
+        style="display: none;"
+    >
+
+        <div>
+
+            نحن نستخدم ملفات تعريف الارتباط (Cookies)
+            لتحسين تجربة تصفحك وتقديم إعلانات مخصصة
+            عبر شبكة Google AdSense.
+
+            باستمرارك في تصفح الموقع، فإنك توافق على
+
+            <a
+                href="/privacy-policy"
+                style="color: var(--gold-accent); text-decoration: underline;"
+            >
+                سياسة الخصوصية
+            </a>.
+
+        </div>
+
+
+        <button
+            onclick="acceptCookies()"
+            class="cookie-btn"
+            type="button"
+        >
+
+            <i class="fas fa-check"></i>
+            موافق ومتابعة
+
+        </button>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- JavaScript -->
+    <!-- ========================================================= -->
+
+    <script>
+
+        function acceptCookies() {
+
+            localStorage.setItem(
+                "shendiCookiesConsent",
+                "accepted"
+            );
+
+            document.getElementById(
+                "cookieNotice"
+            ).style.display = "none";
+
+        }
+
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function() {
+
+                if (
+                    !localStorage.getItem(
+                        "shendiCookiesConsent"
+                    )
+                ) {
+
+                    document.getElementById(
+                        "cookieNotice"
+                    ).style.display = "flex";
+
+                }
+
+            }
+        );
+
+    </script>
+    
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JK5H59BEJ9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-JK5H59BEJ9');
+</script>
+
+
+
+    <!-- ========================================================= -->
+    <!-- Google AdSense -->
+    <!-- ========================================================= -->
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1632368230954022"
+     crossorigin="anonymous"></script>
+</body>
+</html>

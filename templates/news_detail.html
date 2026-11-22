@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+
+<!-- تخصيص عنوان ووسوم الصفحة لمحركات البحث وشبكات التواصل (معاينة احترافية كالقنوات الإخبارية) -->
+{% block title %}{{ news.title }} | يير نيوز{% endblock %}
+{% block meta_desc %}{{ news.details[:160] | replace('\n', ' ') | striptags }}{% endblock %}
+{% block canonical_url %}{{ url_for('news_detail', news_id=news._id, slug=news.title|slugify, _external=True) }}{% endblock %}
+
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ news.title }}{% endblock %}
+{% block og_desc %}{{ news.details[:160] | replace('\n', ' ') | striptags }}...{% endblock %}
+{% block og_url %}{{ url_for('news_detail', news_id=news._id, slug=news.title|slugify, _external=True) }}{% endblock %}
+{% block og_image %}{{ url_for('serve_news_image', news_id=news._id, _external=True) }}{% endblock %}
+{% block og_image_alt %}{{ news.title }}{% endblock %}
+
+{% block tw_title %}{{ news.title }}{% endblock %}
+{% block tw_desc %}{{ news.details[:160] | replace('\n', ' ') | striptags }}...{% endblock %}
+{% block tw_image %}{{ url_for('serve_news_image', news_id=news._id, _external=True) }}{% endblock %}
+
+{% block content %}
+<!-- 📰 بيانات هيكلية دقيقة للمقال (Schema.org NewsArticle) لأرشفة Google News 📰 -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ url_for('news_detail', news_id=news._id, slug=news.title|slugify, _external=True) }}"
+  },
+  "headline": {{ news.title | tojson }},
+  "description": {{ (news.details[:160] | replace('\n', ' ') | striptags) | tojson }},
+  "image": [
+    "{{ url_for('serve_news_image', news_id=news._id, _external=True) }}"
+  ],
+  "datePublished": "{{ news.created_at }}",
+  "dateModified": "{{ news.created_at }}",
+  "author": {
+    "@type": "Organization",
+    "name": "هيئة تحرير يير نيوز",
+    "url": "{{ request.url_root }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "يير نيوز",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ url_for('static', filename='uploads/logo.png', _external=True) }}"
+    }
+  }
+}
+</script>
+
+<style>
+    /* تنسيق صندوق وأزرار المشاركة */
+    .share-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .share-title {
+        font-weight: 800;
+        color: #0f2c59;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .share-btns {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .share-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: 6px;
+        color: #ffffff !important;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 0.85rem;
+        border: none;
+        cursor: pointer;
+        transition: transform 0.2s, opacity 0.2s;
+    }
+    .share-btn:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+    .btn-copy { background: #0f2c59; }
+    .btn-wa { background: #25d366; }
+    .btn-fb { background: #1877f2; }
+    .btn-tg { background: #0088cc; }
+    .btn-x { background: #000000; }
+    
+    .copy-success-msg {
+        display: none;
+        width: 100%;
+        background: #dcfce7;
+        color: #15803d;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        margin-top: 8px;
+    }
+.article-content {
+        font-size: 1.22rem;
+        line-height: 2.2;
+        color: #334155;
+        word-spacing: 1px;
+    }
+
+    /* مسار التصفح لتهيئة قوقل (Breadcrumbs) */
+    .breadcrumbs {
+        font-size: 0.88rem;
+        color: #64748b;
+        margin-bottom: 15px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .breadcrumbs a {
+        color: #0f2c59;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .breadcrumbs a:hover {
+        color: var(--primary-red);
+    }
+</style>
+
+<div class="container" style="max-width: 920px; margin-top: 25px;">
+    
+    <!-- شريط مسار التصفح (Breadcrumb) لمحركات البحث -->
+    <div class="breadcrumbs">
+        <a href="/"><i class="fas fa-home"></i> الرئيسية</a>
+        <span>/</span>
+        <a href="/?category={{ news.category }}">قسم {{ news.category }}</a>
+        <span>/</span>
+        <span style="color: #94a3b8;">تفاصيل الخبر</span>
+    </div>
+
+    <article style="background:#fff; padding:35px; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,0.06); border: 1px solid #f1f5f9;">
+        
+        <span style="background:var(--primary-red); color:#fff; padding:5px 12px; border-radius:4px; font-weight:bold; font-size:0.85rem;">
+            {{ news.category }}
+        </span>
+
+        <h1 style="color:{{ news.color }}; margin: 20px 0 15px; font-size: 2.2rem; font-weight: 900; line-height: 1.45;">
+            {{ news.title }}
+        </h1>
+        
+        <div style="color:var(--text-muted); font-size:0.9rem; margin-bottom: 20px; border-bottom:1px solid #f1f5f9; padding-bottom:15px; display:flex; flex-wrap:wrap; gap:18px;">
+            <span><i class="far fa-clock"></i> تاريخ النشر: {{ news.created_at }}</span>
+            <span><i class="fas fa-map-marker-alt"></i> شندي - ولاية نهر النيل</span>
+            <span><i class="fas fa-user-edit"></i> يير نيوز</span>
+            <span><i class="fas fa-eye" aria-hidden="true"></i> {{ news.views | default(0) }} مشاهدة</span>
+        </div>
+
+        <!-- 🔗 صندوق أزرار مشاركة الخبر 🔗 -->
+        <div class="share-box">
+            <div class="share-title">
+                <i class="fas fa-share-alt" style="color: var(--primary-red);"></i> مشاركة الخبر:
+            </div>
+            <div class="share-btns">
+                <button class="share-btn btn-copy" onclick="copyNewsLink()">
+                    <i class="fas fa-copy"></i> نسخ الرابط
+                </button>
+                <a class="share-btn btn-wa" id="waBtn" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-whatsapp"></i> واتساب
+                </a>
+                <a class="share-btn btn-fb" id="fbBtn" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-facebook-f"></i> فيسبوك
+                </a>
+                <a class="share-btn btn-tg" id="tgBtn" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-telegram-plane"></i> تليجرام
+                </a>
+                <a class="share-btn btn-x" id="xBtn" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-x-twitter"></i> X
+                </a>
+            </div>
+            <div id="copyAlert" class="copy-success-msg">
+                <i class="fas fa-check-circle"></i> تم نسخ رابط الخبر بنجاح! يمكنك الآن لصقه وإرساله في أي مكان.
+            </div>
+        </div>
+<!-- صورة الخبر مدعومة بالحفظ السحابي الدائم -->
+        {% if news.image %}
+        <div style="border-radius: 10px; overflow: hidden; margin-bottom: 30px; border: 3px solid #f1f5f9; background: #0b192c; text-align: center;">
+            <img src="{{ news.image | image_src }}" 
+                 alt="{{ news.title }}" 
+                 style="max-width: 100%; max-height: 520px; object-fit: contain;">
+        </div>
+        {% endif %}
+
+        <!-- تفاصيل الخبر الكاملة -->
+        <div class="article-content">
+            {{ news.details | replace('\n', '<br>') | safe }}
+        </div>
+</article>
+
+    <!-- أخبار ذات صلة لتقليل معدل الارتداد (Bounce Rate) بالروابط الاحترافية -->
+    {% if related %}
+    <h3 style="margin-top: 40px; margin-bottom: 20px; color:#0f2c59; border-right: 4px solid var(--primary-red); padding-right: 12px; font-weight:800;">
+        أخبار أخرى في قسم {{ news.category }}
+    </h3>
+    <div class="news-grid">
+        {% for item in related %}
+        <div class="news-card">
+            <div class="card-body">
+                <h4 style="margin-bottom:12px;">
+                    <a href="/news/{{ item._id }}-{{ item.title | slugify }}" style="color:var(--text-dark); text-decoration:none; line-height:1.4;">
+                        {{ item.title }}
+                    </a>
+                </h4>
+                <a href="/news/{{ item._id }}-{{ item.title | slugify }}" class="btn-read-more" style="font-size:0.85rem;">
+                    قراءة التفاصيل <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- كود تفعيل روابط المشاركة مع تضمين العنوان والملخص والرابط الاحترافي -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const fullShareUrl = "{{ url_for('news_detail', news_id=news._id, slug=news.title|slugify, _external=True) }}";
+        const rawTitle = {{ news.title | tojson }};
+        const rawSummary = {{ (news.details[:120] | replace('\n', ' ') | striptags) | tojson }};
+
+        // رسالة منسقة وجذابة مثل كبرى الصحف
+        const messageText = `📰 *${rawTitle}*\n\n${rawSummary}...\n\n🔗 *لقراءة التقرير كاملاً:* `;
+
+        const encodedUrl = encodeURIComponent(fullShareUrl);
+        const encodedMsg = encodeURIComponent(messageText);
+
+        document.getElementById("waBtn").href = `https://api.whatsapp.com/send?text=${encodedMsg}%20${encodedUrl}`;
+        document.getElementById("fbBtn").href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+        document.getElementById("tgBtn").href = `https://t.me/share/url?url=${encodedUrl}&text=${encodeURIComponent(rawTitle)}`;
+        document.getElementById("xBtn").href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodeURIComponent(rawTitle)}`;
+    });
+
+    function copyNewsLink() {
+        const fullShareUrl = "{{ url_for('news_detail', news_id=news._id, slug=news.title|slugify, _external=True) }}";
+        navigator.clipboard.writeText(fullShareUrl).then(() => {
+            const alertBox = document.getElementById("copyAlert");
+            alertBox.style.display = "block";
+            setTimeout(() => {
+                alertBox.style.display = "none";
+            }, 3500);
+        });
+    }
+</script>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1632368230954022"
+     crossorigin="anonymous"></script>
+{% endblock %}
