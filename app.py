@@ -31,6 +31,12 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 IMGBB_API_KEY = '25619e195c64e9cbc3347330ed724953'
 
+# Freeimage.host: fallback when ImgBB rejects an upload.
+# Prefer setting FREEIMAGE_API_KEY in Render Environment.
+FREEIMAGE_API_KEY = os.environ.get(
+    "FREEIMAGE_API_KEY", "6d207e02198a847aa98d0a2a901485a5"
+).strip()
+
 # =========================================================
 # رابط MongoDB Atlas
 # ضعه في Render Environment Variables باسم:
@@ -49,41 +55,72 @@ db = client.shendi_news_db
 # =========================================================
 
 def upload_image_to_imgbb(file_storage):
+    """Upload to ImgBB, then Freeimage.host if ImgBB fails.
+
+    Save only the final public image URL in MongoDB. Never store image bytes.
+    Returns an empty string when both external hosts reject the upload.
+    """
+    if not file_storage or not file_storage.filename:
+        return ''
+
     try:
-        if not file_storage or file_storage.filename == '':
-            return ''
-
-        if not IMGBB_API_KEY:
-            print("ImgBB API Key is missing.")
-            return ''
-
         file_bytes = file_storage.read()
+        if not file_bytes:
+            app.logger.warning("News image upload skipped: empty file")
+            return ''
 
-        url = "https://api.imgbb.com/1/upload"
+        # Keep the bytes so that the second provider receives the complete
+        # original image even after the first provider was attempted.
+        if IMGBB_API_KEY:
+            try:
+                response = requests.post(
+                    "https://api.imgbb.com/1/upload",
+                    data={"key": IMGBB_API_KEY},
+                    files={"image": file_bytes},
+                    timeout=10
+                )
+                result = response.json()
+                if response.ok and result.get("success"):
+                    image_url = result.get("data", {}).get("url")
+                    if image_url and image_url.startswith(('https://', 'http://')):
+                        app.logger.info("News image uploaded via ImgBB")
+                        return image_url
+                err = result.get("error", {}) if isinstance(result, dict) else {}
+                msg = err.get("message", "unknown") if isinstance(err, dict) else str(err)
+                app.logger.warning("ImgBB upload failed: HTTP %s; %s", response.status_code, msg)
+            except (requests.RequestException, ValueError, TypeError, AttributeError) as exc:
+                app.logger.warning("ImgBB upload failed: %s", exc.__class__.__name__)
 
-        payload = {
-            "key": IMGBB_API_KEY
-        }
+        if FREEIMAGE_API_KEY:
+            try:
+                # Freeimage.host API v1 requires FILES['source'], NOT FILES['image'].
+                # The response uses image.url, not data.url.
+                response = requests.post(
+                    "https://freeimage.host/api/1/upload",
+                    data={"key": FREEIMAGE_API_KEY, "action": "upload", "format": "json"},
+                    files={"source": (secure_filename(file_storage.filename) or 'news-image.jpg',
+                                      file_bytes, file_storage.mimetype or 'application/octet-stream')},
+                    timeout=20
+                )
+                result = response.json()
+                image_info = result.get('image') if isinstance(result, dict) else None
+                image_url = image_info.get('url') if isinstance(image_info, dict) else None
+                if response.ok and image_url and image_url.startswith(('https://', 'http://')):
+                    # Prefer secure display links, as returned links may be http.
+                    if image_url.startswith('http://'):
+                        image_url = 'https://' + image_url[len('http://'):]
+                    app.logger.info("News image uploaded via Freeimage.host")
+                    return image_url
+                app.logger.warning("Freeimage.host upload failed: HTTP %s; status=%s",
+                                   response.status_code,
+                                   result.get('status_txt', 'unknown') if isinstance(result, dict) else 'unknown')
+            except (requests.RequestException, ValueError, TypeError, AttributeError) as exc:
+                app.logger.warning("Freeimage.host upload failed: %s", exc.__class__.__name__)
 
-        files = {
-            "image": file_bytes
-        }
+    except Exception:
+        app.logger.exception("Unexpected news image upload error")
 
-        response = requests.post(
-            url,
-            data=payload,
-            files=files,
-            timeout=15
-        )
-
-        result = response.json()
-
-        if result.get("success"):
-            return result["data"]["url"]
-
-    except Exception as e:
-        print("ImgBB Upload Error:", e)
-
+    app.logger.warning("Image upload failed on both providers; news will still publish without image")
     return ''
 
 
