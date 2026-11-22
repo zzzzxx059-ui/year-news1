@@ -49,46 +49,42 @@ db = client.shendi_news_db
 # =========================================================
 
 def upload_image_to_imgbb(file_storage):
-    """Same multipart upload format as Shendi; fail visibly on ImgBB errors."""
-    if not file_storage or not file_storage.filename:
-        raise ValueError("لم يتم اختيار صورة للرفع")
-
-    # Match Shendi: use the configured key in this Python file, not a stale Render override.
-    api_key = IMGBB_API_KEY.strip()
-    if not api_key:
-        raise RuntimeError("مفتاح ImgBB غير مُعدّ")
-
-    file_bytes = file_storage.read()
-    if not file_bytes:
-        raise ValueError("ملف الصورة فارغ")
-    if len(file_bytes) > 32 * 1024 * 1024:
-        raise ValueError("حجم الصورة أكبر من 32 ميجابايت")
-
     try:
-        # Identical request construction to the working Shendi uploader.
+        if not file_storage or file_storage.filename == '':
+            return ''
+
+        if not IMGBB_API_KEY:
+            print("ImgBB API Key is missing.")
+            return ''
+
+        file_bytes = file_storage.read()
+
+        url = "https://api.imgbb.com/1/upload"
+
+        payload = {
+            "key": IMGBB_API_KEY
+        }
+
+        files = {
+            "image": file_bytes
+        }
+
         response = requests.post(
-            "https://api.imgbb.com/1/upload",
-            data={"key": api_key},
-            files={"image": file_bytes},
+            url,
+            data=payload,
+            files=files,
             timeout=15
         )
-    except requests.RequestException as exc:
-        app.logger.exception("ImgBB upload connection error")
-        raise RuntimeError("تعذّر الاتصال بخدمة ImgBB") from exc
 
-    try:
         result = response.json()
-    except ValueError as exc:
-        app.logger.error("ImgBB non-JSON response; HTTP %s", response.status_code)
-        raise RuntimeError(f"ImgBB أعاد استجابة غير مفهومة (HTTP {response.status_code})") from exc
 
-    if response.ok and result.get("success") and result.get("data", {}).get("url"):
-        return result["data"]["url"]
+        if result.get("success"):
+            return result["data"]["url"]
 
-    error = result.get("error") or {}
-    message = error.get("message", "Unknown error") if isinstance(error, dict) else str(error)
-    app.logger.error("ImgBB upload rejected; HTTP %s; message=%s", response.status_code, message)
-    raise RuntimeError(f"رفض ImgBB رفع الصورة (HTTP {response.status_code}): {message}")
+    except Exception as e:
+        print("ImgBB Upload Error:", e)
+
+    return ''
 
 
 # =========================================================
@@ -313,10 +309,8 @@ def serve_news_image(news_id):
                     return send_file(file_path)
 
     except Exception:
-        app.logger.exception("Error serving news image for news_id=%s", news_id)
+        pass
 
-    # الصورة غير متوفرة؛ نسجل ذلك بدلاً من إخفاء المشكلة بالكامل.
-    app.logger.warning("News image missing or unavailable for news_id=%s", news_id)
     # استخدام اللوجو كصورة احتياطية
     logo_path = os.path.join(
         app.config['UPLOAD_FOLDER'],
@@ -1228,11 +1222,9 @@ def add_news():
 
         if file.filename != '':
 
-            try:
-                image_url = upload_image_to_imgbb(file)
-            except (ValueError, RuntimeError) as exc:
-                flash(f"لم يُنشر الخبر لأن رفع الصورة فشل: {exc}")
-                return redirect(url_for('admin_dashboard'))
+            image_url = upload_image_to_imgbb(
+                file
+            )
 
     db.news.insert_one({
         "title": title,
@@ -1307,11 +1299,9 @@ def edit_news(news_id):
 
         file = request.files['image']
 
-        try:
-            image_url = upload_image_to_imgbb(file)
-        except (ValueError, RuntimeError) as exc:
-            flash(f"لم يتم حفظ التعديل لأن رفع الصورة فشل: {exc}")
-            return redirect(url_for('admin_dashboard'))
+        image_url = upload_image_to_imgbb(
+            file
+        )
 
         if image_url:
 
