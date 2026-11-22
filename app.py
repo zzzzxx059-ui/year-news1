@@ -53,7 +53,8 @@ def upload_image_to_imgbb(file_storage):
     if not file_storage or not file_storage.filename:
         raise ValueError("لم يتم اختيار صورة للرفع")
 
-    api_key = os.environ.get("IMGBB_API_KEY", IMGBB_API_KEY).strip()
+    # Match Shendi: use the configured key in this Python file, not a stale Render override.
+    api_key = IMGBB_API_KEY.strip()
     if not api_key:
         raise RuntimeError("مفتاح ImgBB غير مُعدّ")
 
