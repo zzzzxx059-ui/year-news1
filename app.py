@@ -29,7 +29,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # IMGBB_API_KEY
 # =========================================================
 
-IMGBB_API_KEY = '85c7ff6f1e72c472683b7ac998a05e38'
+IMGBB_API_KEY = '25619e195c64e9cbc3347330ed724953'
 
 # =========================================================
 # رابط MongoDB Atlas
