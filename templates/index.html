@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}يير نيوز | أخبار نهر النيل وريفي ود حامد لحظة بلحظة{% endblock %}
+{% block title %}يير نيوز | أخبار العالم  لحظة بلحظة{% endblock %}
 
 <!-- 🌧️☀️ بطاقة الطقس الحية تظهر شمال الشعار في الهيدر 🌧️☀️ -->
 {% block header_weather %}
@@ -126,14 +126,14 @@
     <div class="header-weather-info">
         <div class="hw-title">
             <i class="fas fa-map-marker-alt" style="color:#fecaca;"></i> 
-            <span>ريفي ود حامد:</span>
+            <span>حالة الطقس الان:</span>
             <span id="hWadTemp" style="font-size:1.3rem; font-weight:900; color:#fff;">--°</span>
         </div>
         <div class="hw-desc" id="hWadStatus">
             <i class="fas fa-spinner fa-spin"></i> رصد الطقس المباشر...
         </div>
         <div class="hw-shendi-badge">
-            <span>شندي: <strong id="hShendiTemp">--°</strong></span>
+            <span>الرياح: <strong id="hShendiTemp">--°</strong></span>
             <span id="hShendiStatus">صافٍ</span>
         </div>
     </div>
@@ -401,7 +401,7 @@
         rAnimId = requestAnimationFrame(drawHeaderRain);
     }
 
-    // جلب بيانات الطقس الحية لمدينة شندي وريفي ود حامد
+    // جلب بيانات الطقس الحية للعالم الان
     async function fetchHeaderWeather() {
         try {
             const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=16.6917&longitude=33.4342&current=temperature_2m,weather_code');
@@ -479,6 +479,6 @@
         fetchHeaderWeather();
     });
 </script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1632368230954022"
-     crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6716978301705670"
+     crossorigin="anonymous"></script>>
 {% endblock %}
