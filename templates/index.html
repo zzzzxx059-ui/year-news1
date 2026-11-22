@@ -1,0 +1,585 @@
+{% extends 'base.html' %}
+
+{% block title %}يير نيوز | أخبار العالم  لحظة بلحظة{% endblock %}
+
+<!-- 🌧️☀️ بطاقة الطقس الحية تظهر شمال الشعار في الهيدر 🌧️☀️ -->
+{% block header_weather %}
+<style>
+    /* بطاقة الطقس داخل الهيدر (شمال الشعار) */
+    .header-weather-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        padding: 8px 16px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 290px;
+        max-width: 360px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+        border: 1px solid rgba(255,255,255,0.15);
+        transition: all 0.8s ease;
+        z-index: 10;
+    }
+
+    /* خلفيات الطقس التفاعلية */
+    .weather-theme-sunny {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.9) 0%, rgba(180, 83, 9, 0.95) 100%);
+        border-color: rgba(253, 224, 71, 0.4);
+    }
+    .weather-theme-hot {
+        background: linear-gradient(135deg, rgba(234, 88, 12, 0.95) 0%, rgba(124, 45, 18, 0.95) 100%);
+        box-shadow: 0 0 20px rgba(234, 88, 12, 0.4);
+    }
+    .weather-theme-rain {
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(2, 6, 23, 0.98) 100%);
+        border-color: rgba(56, 189, 248, 0.6);
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.35);
+    }
+    .weather-theme-clouds {
+        background: linear-gradient(135deg, rgba(51, 65, 85, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    }
+
+    /* قماش أنيميشن قطرات المطر التفاعلي */
+    #headerRainCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        display: none;
+        z-index: 1;
+    }
+
+    /* شمس ساطعة ومتحركة */
+    .header-sun-glow {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        background: radial-gradient(circle, #fef08a 25%, #facc15 65%, #eab308 100%);
+        border-radius: 50%;
+        box-shadow: 0 0 25px rgba(250, 204, 21, 0.95);
+        animation: pulseHeaderSun 2.5s ease-in-out infinite alternate;
+        flex-shrink: 0;
+        display: none;
+    }
+    @keyframes pulseHeaderSun {
+        0% { transform: scale(0.92); box-shadow: 0 0 15px rgba(250, 204, 21, 0.7); }
+        100% { transform: scale(1.08); box-shadow: 0 0 30px rgba(250, 204, 21, 1); }
+    }
+
+    /* سحابة ومطر متحرك */
+    .header-cloud-glow {
+        font-size: 2.2rem;
+        color: #bae6fd;
+        filter: drop-shadow(0 2px 8px rgba(56,189,248,0.5));
+        animation: floatHeaderCloud 3s ease-in-out infinite alternate;
+        flex-shrink: 0;
+        display: none;
+    }
+    @keyframes floatHeaderCloud {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-4px); }
+    }
+
+    .header-weather-info {
+        position: relative;
+        z-index: 2;
+        flex-grow: 1;
+    }
+
+    .hw-title {
+        font-size: 0.85rem;
+        font-weight: 900;
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .hw-desc {
+        font-size: 0.78rem;
+        font-weight: 700;
+        margin-top: 2px;
+        line-height: 1.3;
+    }
+    .hw-shendi-badge {
+        font-size: 0.75rem;
+        color: #e2e8f0;
+        margin-top: 3px;
+        padding-top: 3px;
+        border-top: 1px solid rgba(255,255,255,0.2);
+        display: flex;
+        justify-content: space-between;
+    }
+    .weather-picker-label { display:block; font-size:.7rem; margin-top:3px; color:#fff; }
+    .weather-city-select { width:100%; max-width:290px; background:rgba(255,255,255,.95); color:#17243a; border:1px solid #cbd5e1; border-radius:7px; padding:4px 7px; font-family:'Cairo',Tahoma,Arial,sans-serif; font-size:.78rem; direction:rtl; cursor:pointer; }
+    .weather-city-select:focus { outline:2px solid #facc15; }
+    .weather-search-row { display:flex; gap:4px; margin-top:5px; }
+    .weather-search-row input { min-width:0; width:100%; padding:4px 6px; background:#fff; color:#17243a; border:1px solid #cbd5e1; border-radius:6px; font-size:.69rem; }
+    .weather-search-row button { flex-shrink:0; border:0; border-radius:6px; background:#facc15; color:#17243a; font-weight:800; cursor:pointer; padding:2px 9px; font-size:.72rem; }
+    .header-weather-card { max-width:380px; }
+</style>
+
+<div id="headerWeatherBox" class="header-weather-card weather-theme-sunny">
+    <!-- قماش سقوط قطرات المطر الفعلي -->
+    <canvas id="headerRainCanvas"></canvas>
+
+    <!-- أيقونة الشمس أو المطر المتحركة -->
+    <div id="hSun" class="header-sun-glow"></div>
+    <div id="hCloud" class="header-cloud-glow"><i class="fas fa-cloud-showers-heavy"></i></div>
+
+    <div class="header-weather-info">
+        <div class="hw-title"><i class="fas fa-globe-asia" style="color:#fecaca;"></i> الطقس حول العالم</div>
+        <label for="worldWeatherCity" class="weather-picker-label">اختر المدينة</label>
+        <select id="worldWeatherCity" class="weather-city-select" aria-label="اختر مدينة لعرض الطقس">
+            <optgroup label="آسيا">
+                <option value="riyadh" selected>الرياض – السعودية</option>
+                <option value="madinah">المدينة المنورة – السعودية</option>
+                <option value="dubai">دبي – الإمارات</option>
+                <option value="tokyo">طوكيو – اليابان</option>
+                <option value="newdelhi">نيودلهي – الهند</option>
+                <option value="beijing">بكين – الصين</option>
+            </optgroup>
+            <optgroup label="أفريقيا">
+                <option value="khartoum">الخرطوم – السودان</option>
+                <option value="cairo">القاهرة – مصر</option>
+                <option value="nairobi">نيروبي – كينيا</option>
+                <option value="johannesburg">جوهانسبرغ – جنوب أفريقيا</option>
+            </optgroup>
+            <optgroup label="أوروبا">
+                <option value="london">لندن – بريطانيا</option>
+                <option value="paris">باريس – فرنسا</option>
+                <option value="berlin">برلين – ألمانيا</option>
+                <option value="istanbul">إسطنبول – تركيا</option>
+            </optgroup>
+            <optgroup label="أمريكا الشمالية">
+                <option value="newyork">نيويورك – أمريكا</option>
+                <option value="toronto">تورونتو – كندا</option>
+                <option value="mexicocity">مكسيكو سيتي – المكسيك</option>
+            </optgroup>
+            <optgroup label="أمريكا الجنوبية">
+                <option value="saopaulo">ساو باولو – البرازيل</option>
+                <option value="buenosaires">بوينس آيرس – الأرجنتين</option>
+            </optgroup>
+            <optgroup label="أوقيانوسيا">
+                <option value="sydney">سيدني – أستراليا</option>
+                <option value="auckland">أوكلاند – نيوزيلندا</option>
+            </optgroup>
+        </select>
+        <div class="weather-search-row">
+            <input id="worldWeatherSearch" type="search" aria-label="ابحث عن أي مدينة في العالم" placeholder="أو اكتب اسم مدينة بالعربية أو الإنجليزية">
+            <button type="button" id="worldWeatherSearchBtn">بحث</button>
+        </div>
+        <div class="hw-desc" id="hWadStatus" role="status" aria-live="polite">جارٍ تحميل الطقس...</div>
+        <div class="hw-title" style="margin-top:3px;">
+            <span id="hWadTemp" style="font-size:1.35rem;">--°</span>
+            <span style="font-size:.75rem; font-weight:600;">مئوية</span>
+        </div>
+        <div class="hw-shendi-badge">
+            <span>الرياح: <strong id="hShendiTemp">--</strong></span>
+            <span id="hShendiStatus">بيانات مباشرة</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<style>
+    /* الشريط الإخباري */
+    .ticker-wrapper {
+        display: flex;
+        background: #1e293b;
+        color: #fff;
+        align-items: center;
+        border-bottom: 2px solid var(--primary-red);
+        overflow: hidden;
+        height: 48px;
+    }
+    .ticker-title {
+        background: var(--primary-red);
+        color: #fff;
+        padding: 0 20px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        z-index: 5;
+        box-shadow: -4px 0 10px rgba(0,0,0,0.3);
+    }
+    .ticker-content {
+        flex-grow: 1;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    .ticker-scroll {
+        display: inline-block;
+        white-space: nowrap;
+        padding-right: 100%;
+        animation: marquee 65s linear infinite;
+    }
+    .ticker-scroll:hover {
+        animation-play-state: paused;
+    }
+    @keyframes marquee {
+        0% { transform: translate3d(0, 0, 0); }
+        100% { transform: translate3d(100%, 0, 0); }
+    }
+    .ticker-item {
+        display: inline-flex;
+        align-items: center;
+        color: #fff;
+        text-decoration: none;
+        margin: 0 15px;
+        font-size: 0.95rem;
+        transition: color 0.2s ease;
+    }
+    .ticker-item:hover {
+        color: #fca5a5;
+    }
+    .ticker-logo {
+        color: var(--primary-red);
+        margin-right: 12px;
+        font-size: 1.1rem;
+    }
+
+    /* سلايدر أفقي سلس */
+    .slider-viewport {
+        position: relative;
+        width: 100%;
+        height: 480px;
+        background: #08111d;
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform: translateX(100%);
+        transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #060d17;
+    }
+    .slide.active { transform: translateX(0); z-index: 2; }
+    .slide.prev { transform: translateX(-100%); z-index: 1; }
+    .slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: radial-gradient(circle, #102138 0%, #060d17 100%);
+    }
+    .slide-caption {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        background: linear-gradient(to top, rgba(6, 13, 23, 0.95) 0%, rgba(6, 13, 23, 0.7) 60%, transparent 100%);
+        padding: 40px 5% 20px;
+        color: #fff;
+        z-index: 3;
+    }
+    .slider-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 45px;
+        height: 45px;
+        background: rgba(200, 16, 46, 0.85);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+        z-index: 10;
+        transition: background 0.3s, transform 0.2s;
+    }
+    .slider-arrow:hover {
+        background: #900c1e;
+        transform: translateY(-50%) scale(1.1);
+    }
+    .slider-arrow.prev-btn { right: 20px; }
+    .slider-arrow.next-btn { left: 20px; }
+</style>
+
+<!-- شريط الأخبار العاجلة -->
+{% if breaking_news %}
+<div class="ticker-wrapper">
+    <div class="ticker-title"><i class="fas fa-bolt"></i> عاجل يير نيوز</div>
+    <div class="ticker-content">
+        <div class="ticker-scroll">
+            {% for item in breaking_news %}
+                <a href="{% if item.url %}{{ item.url }}{% else %}/news/{{ item._id }}-{{ item.title | slugify }}{% endif %}" class="ticker-item">
+                    {{ item.title }}
+                </a>
+                <span class="ticker-logo"><i class="fas fa-globe"></i> يير نيوز</span>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- السلايدر المتحرك -->
+{% if slider_news %}
+<div class="slider-viewport">
+    <button class="slider-arrow prev-btn" onclick="moveSlide(-1)" aria-label="السابق"><i class="fas fa-chevron-right"></i></button>
+    <button class="slider-arrow next-btn" onclick="moveSlide(1)" aria-label="التالي"><i class="fas fa-chevron-left"></i></button>
+
+    {% for slide in slider_news %}
+    <div class="slide {% if loop.first %}active{% endif %}">
+        <img src="{{ url_for('serve_news_image', news_id=slide._id) }}" alt="{{ slide.title }}">
+        <div class="slide-caption">
+            <span style="background:var(--primary-red); padding:4px 12px; border-radius:4px; font-size:0.85rem; font-weight:bold;">خبر رئيسي</span>
+            <h2 style="font-size:1.8rem; margin-top:8px; font-weight:800;">
+                <a href="/news/{{ slide._id }}-{{ slide.title | slugify }}" style="color:#fff; text-decoration:none;">{{ slide.title }}</a>
+            </h2>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="container">
+
+    <h1 style="border-right: 5px solid var(--primary-red); padding-right: 12px; margin: 20px 0 25px; font-size: 1.7rem; font-weight: 900; color: #0f2c59;">
+        {% if current_category %} قسم أخبار {{ current_category }} - يير نيوز {% else %} آخر الأخبار والتقارير  {% endif %}
+    </h1>
+
+    <div class="news-grid">
+        {% for news in news_list %}
+        <article class="news-card">
+            <div class="card-img-wrapper" style="background: #0b192c; height: 190px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;">
+                <img src="{{ url_for('serve_news_image', news_id=news._id) }}" alt="صورة خبر: {{ news.title }}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+                <div class="card-category-badge" style="position: absolute; top: 10px; right: 10px; background: var(--primary-red); color: #fff; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">{{ news.category }}</div>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title" style="color: {{ news.color }};">
+                    <a href="/news/{{ news._id }}-{{ news.title | slugify }}" style="color: inherit; text-decoration: none;">{{ news.title }}</a>
+                </h3>
+                <p class="card-summary">{{ news.details }}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 10px; border-top: 1px solid #f1f5f9;">
+                    <span style="font-size: 0.8rem; color: #94a3b8;"><i class="far fa-clock"></i> {{ news.created_at | format_date }}</span>
+                    <a href="/news/{{ news._id }}-{{ news.title | slugify }}" class="btn-read-more">
+                        اقرأ التفاصيل <i class="fas fa-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </article>
+
+        {% else %}
+        <div style="grid-column: 1 / -1; text-align:center; padding: 40px; background:#fff; border-radius:10px;">
+            <h3>لا توجد أخبار منشورة في هذا القسم حتى الآن.</h3>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        {% if page > 1 %}
+            <a href="?page={{ page - 1 }}{% if current_category %}&category={{ current_category }}{% endif %}" class="page-btn">السابق</a>
+        {% endif %}
+        
+        {% for p in range(1, total_pages + 1) %}
+            <a href="?page={{ p }}{% if current_category %}&category={{ current_category }}{% endif %}" class="page-btn {% if p == page %}active{% endif %}">{{ p }}</a>
+        {% endfor %}
+
+        {% if page < total_pages %}
+            <a href="?page={{ page + 1 }}{% if current_category %}&category={{ current_category }}{% endif %}" class="page-btn">التالي</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- سكربت الطقس المباشر، السلايدر، وأنيميشن المطر والشمس الساطعة -->
+<script>
+    /* ==========================================
+        محاكي قطرات المطر (Canvas Animation)
+       ========================================== */
+    const rCanvas = document.getElementById('headerRainCanvas');
+    let rCtx, rDrops = [], rAnimId;
+
+    if (rCanvas) {
+        rCtx = rCanvas.getContext('2d');
+    }
+
+    function initHeaderRain() {
+        if (!rCanvas) return;
+        rCanvas.width = rCanvas.parentElement.offsetWidth;
+        rCanvas.height = rCanvas.parentElement.offsetHeight;
+        rDrops = [];
+        for (let i = 0; i < 45; i++) {
+            rDrops.push({
+                x: Math.random() * rCanvas.width,
+                y: Math.random() * rCanvas.height,
+                length: Math.random() * 12 + 6,
+                speed: Math.random() * 7 + 8
+            });
+        }
+    }
+
+    function drawHeaderRain() {
+        if (!rCtx || !rCanvas) return;
+        rCtx.clearRect(0, 0, rCanvas.width, rCanvas.height);
+        rCtx.strokeStyle = 'rgba(186, 230, 253, 0.65)';
+        rCtx.lineWidth = 1.2;
+        rCtx.beginPath();
+        for (let drop of rDrops) {
+            rCtx.moveTo(drop.x, drop.y);
+            rCtx.lineTo(drop.x, drop.y + drop.length);
+            drop.y += drop.speed;
+            if (drop.y > rCanvas.height) {
+                drop.y = -20;
+                drop.x = Math.random() * rCanvas.width;
+            }
+        }
+        rCtx.stroke();
+        rAnimId = requestAnimationFrame(drawHeaderRain);
+    }
+
+    // إحداثيات مدن حقيقية من القارات المختلفة. البيانات تُطلب عند اختيار المدينة فقط.
+    const weatherCities = {
+        riyadh:[24.7136,46.6753], madinah:[24.5247,39.5692], dubai:[25.2048,55.2708],
+        tokyo:[35.6762,139.6503], newdelhi:[28.6139,77.2090], beijing:[39.9042,116.4074],
+        khartoum:[15.5007,32.5599], cairo:[30.0444,31.2357], nairobi:[-1.2921,36.8219],
+        johannesburg:[-26.2041,28.0473], london:[51.5074,-0.1278], paris:[48.8566,2.3522],
+        berlin:[52.5200,13.4050], istanbul:[41.0082,28.9784], newyork:[40.7128,-74.0060],
+        toronto:[43.6532,-79.3832], mexicocity:[19.4326,-99.1332], saopaulo:[-23.5505,-46.6333],
+        buenosaires:[-34.6037,-58.3816], sydney:[-33.8688,151.2093], auckland:[-36.8485,174.7633]
+    };
+    let weatherRequest = 0;
+    let customWeatherCoords = null;
+    function weatherDescription(code) {
+        if (code === 0) return 'سماء صافية';
+        if ([1,2].includes(code)) return 'غائم جزئياً';
+        if (code === 3) return 'غائم';
+        if ([45,48].includes(code)) return 'ضباب';
+        if (code >= 51 && code <= 67) return 'أمطار أو رذاذ';
+        if (code >= 71 && code <= 77) return 'ثلوج';
+        if (code >= 80 && code <= 82) return 'زخات مطر';
+        if (code >= 85 && code <= 86) return 'زخات ثلج';
+        if (code >= 95) return 'عواصف رعدية';
+        return 'حالة جوية متغيرة';
+    }
+    async function fetchHeaderWeather() {
+        const picker = document.getElementById('worldWeatherCity');
+        if (!picker) return;
+        const coords = picker.value === "custom" ? customWeatherCoords : weatherCities[picker.value];
+        if (!coords) return;
+        const req = ++weatherRequest;
+        const tempNode = document.getElementById('hWadTemp');
+        const windNode = document.getElementById('hShendiTemp');
+        const statusDesc = document.getElementById('hWadStatus');
+        const statusExtra = document.getElementById('hShendiStatus');
+        const box = document.getElementById('headerWeatherBox');
+        const sun = document.getElementById('hSun');
+        const cloud = document.getElementById('hCloud');
+        statusDesc.textContent = 'جارٍ تحديث الطقس...';
+        tempNode.textContent = '--°';
+        windNode.textContent = '--';
+        try {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords[0]}&longitude=${coords[1]}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Weather API error');
+            const data = await response.json();
+            if (req !== weatherRequest) return;
+            if (!data.current || !Number.isFinite(data.current.temperature_2m)) throw new Error('Missing current weather');
+            const temp = Math.round(data.current.temperature_2m);
+            const code = data.current.weather_code;
+            tempNode.textContent = temp + '°';
+            windNode.textContent = Math.round(data.current.wind_speed_10m) + ' كم/س';
+            statusDesc.textContent = weatherDescription(code);
+            statusExtra.textContent = 'الرطوبة ' + Math.round(data.current.relative_humidity_2m) + '%';
+            const rainy = (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || code >= 95;
+            const cloudy = rainy || (code >= 2 && code <= 3) || [45,48].includes(code) || (code >= 71 && code <= 86);
+            box.className = 'header-weather-card ' + (rainy ? 'weather-theme-rain' : temp > 38 ? 'weather-theme-hot' : cloudy ? 'weather-theme-clouds' : 'weather-theme-sunny');
+            sun.style.display = cloudy ? 'none' : 'block';
+            cloud.style.display = cloudy ? 'block' : 'none';
+            if (rCanvas) {
+                rCanvas.style.display = rainy ? 'block' : 'none';
+                cancelAnimationFrame(rAnimId);
+                if (rainy) { initHeaderRain(); drawHeaderRain(); }
+            }
+        } catch (error) {
+            if (req !== weatherRequest) return;
+            statusDesc.textContent = 'تعذر تحميل الطقس، حاول تغيير المدينة';
+            statusExtra.textContent = 'غير متاح الآن';
+        }
+    }
+
+    async function findWorldWeatherCity() {
+        const search = document.getElementById('worldWeatherSearch');
+        const picker = document.getElementById('worldWeatherCity');
+        const status = document.getElementById('hWadStatus');
+        const name = search.value.trim();
+        if (!name) return;
+        status.textContent = 'جارٍ البحث عن المدينة...';
+        try {
+            const uri = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=1&language=ar&format=json`;
+            const res = await fetch(uri);
+            if (!res.ok) throw new Error('Geocoding failed');
+            const data = await res.json();
+            if (!data.results || !data.results.length) {
+                status.textContent = 'المدينة غير موجودة، جرّب كتابتها بالإنجليزية';
+                return;
+            }
+            const city = data.results[0];
+            customWeatherCoords = [city.latitude, city.longitude];
+            let opt = picker.querySelector('option[value="custom"]');
+            if (!opt) { opt = document.createElement('option'); opt.value = 'custom'; picker.appendChild(opt); }
+            opt.textContent = city.name + (city.country ? ' – ' + city.country : '');
+            picker.value = 'custom';
+            fetchHeaderWeather();
+        } catch (e) { status.textContent = 'تعذر البحث الآن، حاول لاحقاً'; }
+    }
+
+    /* ==========================================
+        منطق السلايدر الأفقي
+       ========================================== */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+
+    function showSlide(index) {
+        if (!slides.length) return;
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active', 'prev');
+            if (i === index) {
+                slide.classList.add('active');
+            } else if (i < index) {
+                slide.classList.add('prev');
+            }
+        });
+    }
+
+    function moveSlide(direction) {
+        if (!slides.length) return;
+        currentSlide = (currentSlide + direction + slides.length) % slides.length;
+        showSlide(currentSlide);
+    }
+
+    setInterval(() => {
+        if (slides.length > 1) {
+            moveSlide(1);
+        }
+    }, 6000);
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const citySelect = document.getElementById("worldWeatherCity");
+        if (citySelect) citySelect.addEventListener("change", fetchHeaderWeather);
+        document.getElementById('worldWeatherSearchBtn')?.addEventListener('click', findWorldWeatherCity);
+        document.getElementById('worldWeatherSearch')?.addEventListener('keydown', function(e) { if(e.key === 'Enter') {e.preventDefault();findWorldWeatherCity();} });
+        fetchHeaderWeather();
+    });
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6716978301705670"
+     crossorigin="anonymous"></script>
+{% endblock %}
